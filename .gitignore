@@ -138,8 +138,9 @@ buildroot/share/cmake/*
 CMakeLists.txt
 !buildroot/share/cmake/CMakeLists.txt
 src/CMakeLists.txt
-CMakeListsPrivate.txt
-build/
+# build/
+!build/
+!build/**
 
 # CLion
 cmake-build-*
