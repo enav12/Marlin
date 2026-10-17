@@ -12,32 +12,36 @@
 // Placa base Creality 4.2.7 (STM32F103)
 #define MOTHERBOARD BOARD_CREALITY_V427
 
-// Comunicación Serie Dual:
+// Comunicación Serie:
 // Puerto 1: Conexión USB al computador (CH340 / USART1)
 #define SERIAL_PORT 1
 #define BAUDRATE 115200
 
-// Puerto 2: Conexión USART3 en conector EXP1 hacia la pantalla DWIN (PB10 / PB11)
-#define SERIAL_PORT_2 3
-#define BAUDRATE_2 115200
+// Nota: No definir SERIAL_PORT_2 como 3, ya que el puerto serie de la pantalla
+// se asigna exclusivamente mediante LCD_SERIAL_PORT en Configuration_adv.h.
 
 // Interfaz Gráfica DGUS / DWIN para pantalla táctil
-// Selecciona la variante compatible con el juego de iconos DW7.4.6:
+// Variante compatible con el juego de iconos DW7.4.6:
 #define DGUS_LCD_UI_ORIGIN
-// Alternativa para interfaces recargadas:
-// #define DGUS_LCD_UI_RELOADED
 
+// Soporte de modulación por software del ventilador (requerido por hardware 4.2.7)
+#define FAN_SOFT_PWM
 
 // =============================================================================
 // 2. CAMBIOS EN: Marlin/Configuration_adv.h
 // =============================================================================
 
 #if HAS_DGUS_LCD
-  // Asignar el puerto serie del LCD al USART3 (puerto 3 en STM32F1)
+  // Asignar el puerto serie del LCD al USART3 (conector EXP1 pines PB10 / PB11)
   #define LCD_SERIAL_PORT 3
+  #define LCD_BAUDRATE 115200
 #endif
 
 // Habilitar almacenamiento de configuraciones en memoria EEPROM
 #define EEPROM_SETTINGS
 #define EEPROM_CHITCHAT
 #define EEPROM_AUTO_INIT
+
+// Babystepping para calibración en vivo del Z-Offset con CR Touch
+#define BABYSTEPPING
+#define BABYSTEP_ZPROBE_OFFSET
