@@ -17,6 +17,7 @@
 | **6** | Centralización de proyectos a instalar en carpeta `build/` | Agrupar los proyectos/paquetes instalables en `build/` (`build/creality_v427/` y `build/display_DW7.4.6/`). | ✅ **Implementado** |
 | **7** | Integración de sensor de auto-nivelación **CR Touch** | Habilitar `BLTOUCH`, uso de sonda para Z homing en puerto dedicado de 5 pines (PB1/PB0), `Z_SAFE_HOMING`, nivelación bilineal 3x3 y babystepping dinámico con guardado en EEPROM. | ✅ **Implementado** |
 | **8** | Consulta: Flasheo de firmware mediante cable USB | Análisis de compatibilidad con el bootloader de la placa v4.2.7 y métodos de instalación válidos. | ✅ **Aclarado y Documentado** |
+| **9** | Generación de archivo `.bin` listo para instalar | Compilación exitosa con PlatformIO para el entorno `STM32F103RE_creality`, corrección de `FAN_SOFT_PWM` y despliegue del binario en `build/creality_v427/`. | ✅ **Implementado** |
 
 ---
 
@@ -39,7 +40,7 @@ gantt
     BLTOUCH + Z_SAFE_HOMING + Babystepping + EEPROM:done, 50, 70
     section Fase 5: Validación y Flasheo
     Configuración de compilación PlatformIO        :done, 70, 85
-    Generación y despliegue a build/               :active, 85, 100
+    Generación y despliegue de .bin a build/       :done, 85, 100
     section Fase 6: Mantenimiento y Upgrades
     Estrategia de actualización upstream           :done, 30, 50
 ```
@@ -63,6 +64,7 @@ gantt
   - [x] Inversión de dirección para TMC2208 (`INVERT_Y_DIR false`, `INVERT_Z_DIR true`).
   - [x] Pasos por mm calibrados: `{ 80, 80, 400, 93 }`.
   - [x] Dimensiones de cama: 220 x 220 x 250 mm.
+  - [x] `#define FAN_SOFT_PWM` habilitado (requerido por el diseño de hardware del transistor de ventilación).
 
 ### Fase 3: Proyectos de Instalación en `build/` [100%]
 - [x] Carpeta de instalación centralizada [`build/`](file:///c:/Enavarrete/Proyectos/Marlin/build).
@@ -87,10 +89,14 @@ gantt
   - [x] `#define BABYSTEPPING` y `#define BABYSTEP_ZPROBE_OFFSET` activos en `Configuration_adv.h`.
   - [x] `#define EEPROM_SETTINGS` y `#define EEPROM_AUTO_INIT` para guardar el Z-Offset de forma permanente en la placa.
 
-### Fase 5: Validación, Compilación y Flasheo [En Progreso]
+### Fase 5: Validación, Compilación y Flasheo [100%]
 - [x] Configuración del entorno de compilación `STM32F103RE_creality` en `platformio.ini`.
-- [ ] Compilación del firmware en VS Code con PlatformIO o Auto Build Marlin.
-- [ ] Colocación del archivo compilado `firmware-YYYYMMDD-HHMMSS.bin` en [`build/creality_v427/`](file:///c:/Enavarrete/Proyectos/Marlin/build/creality_v427).
+- [x] Compilación exitosa del firmware con PlatformIO:
+  - Uso de memoria RAM: 5,880 bytes (9.0% de 64 KB).
+  - Uso de memoria Flash: 103,900 bytes (21.0% de 484 KB).
+- [x] Archivo binario generado y copiado a [`build/creality_v427/`](file:///c:/Enavarrete/Proyectos/Marlin/build/creality_v427):
+  - `build/creality_v427/firmware-20261017-182933.bin` (104,452 bytes).
+  - `build/creality_v427/firmware.bin` (104,452 bytes).
 - [ ] Flasheo de la pantalla MicroSD (`DWIN_SET` con clúster de 4096 bytes).
 - [ ] Flasheo de la placa Creality v4.2.7 vía MicroSD.
 
@@ -122,12 +128,12 @@ gantt
 5. Apaga la impresora y retira la MicroSD.
 
 ### 2. Placa Creality v4.2.7 (`build/creality_v427/`):
-1. Compila el firmware usando **PlatformIO** (o la extensión **Auto Build Marlin** en VS Code) seleccionando el entorno `STM32F103RE_creality`.
-2. El archivo resultante `.pio/build/STM32F103RE_creality/firmware.bin` lo guardas en [`build/creality_v427/`](file:///c:/Enavarrete/Proyectos/Marlin/build/creality_v427).
-3. Formatea una tarjeta MicroSD en **FAT32**.
-4. Copia el archivo binario renombrándolo (ej: `firmware_427_01.bin` — el gestor de arranque de Creality no flashea archivos con el mismo nombre consecutivo).
-5. Con la impresora apagada, inserta la MicroSD en la placa Creality.
-6. Enciende la impresora; tardará entre 10 y 15 segundos en cargar el nuevo firmware.
+1. El archivo binario compilado ya se encuentra en [`build/creality_v427/firmware-20261017-182933.bin`](file:///c:/Enavarrete/Proyectos/Marlin/build/creality_v427/firmware-20261017-182933.bin).
+2. Formatea una tarjeta MicroSD en **FAT32**.
+3. Copia el archivo `firmware-20261017-182933.bin` a la raíz de la tarjeta MicroSD.
+   *(Nota: Si ya habías instalado un firmware con ese mismo nombre antes, renómbralo a algo nuevo como `firmware_v427_01.bin`, ya que el bootloader de Creality ignora archivos con el mismo nombre que el último cargado).*
+4. Con la impresora apagada, inserta la MicroSD en la ranura de la placa Creality.
+5. Enciende la impresora. La pantalla permanecerá unos 10-15 segundos en blanco mientras se flashea y luego cargará Marlin.
 
 ### 3. Calibración del CR Touch tras el primer inicio:
 1. Enciende la impresora y ejecuta `G28` (Auto Home) desde la pantalla o terminal serial. La impresora llevará X e Y al inicio, luego centrará el hotend y desplegará el pin del CR Touch para medir el eje Z en el centro de la cama.
