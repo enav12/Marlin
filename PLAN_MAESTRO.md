@@ -16,6 +16,7 @@
 | **5** | Compatibilidad y estrategia de actualización con futuras versiones de Marlin | Garantizar que el proyecto pueda recibir actualizaciones oficiales (`upstream`) sin romper la placa ni el subproyecto de pantalla. | ✅ **Definido y Documentado** |
 | **6** | Centralización de proyectos a instalar en carpeta `build/` | Agrupar los proyectos/paquetes instalables en `build/` (`build/creality_v427/` y `build/display_DW7.4.6/`). | ✅ **Implementado** |
 | **7** | Integración de sensor de auto-nivelación **CR Touch** | Habilitar `BLTOUCH`, uso de sonda para Z homing en puerto dedicado de 5 pines (PB1/PB0), `Z_SAFE_HOMING`, nivelación bilineal 3x3 y babystepping dinámico con guardado en EEPROM. | ✅ **Implementado** |
+| **8** | Consulta: Flasheo de firmware mediante cable USB | Análisis de compatibilidad con el bootloader de la placa v4.2.7 y métodos de instalación válidos. | ✅ **Aclarado y Documentado** |
 
 ---
 
@@ -103,6 +104,15 @@ gantt
 ---
 
 ## 4. Guía de Flasheo e Instalación de los Proyectos en `build/`
+
+### ¿Se puede instalar el firmware por el cable USB?
+> [!IMPORTANT]
+> **No de manera directa con la placa de fábrica.**
+> 
+> - **Explicación técnica:** La placa Creality v4.2.7 tiene un chip convertidor USB-Serial CH340 conectado al microcontrolador STM32F103. El *bootloader* de fábrica instalado en la placa está programado exclusivamente para buscar archivos `.bin` dentro de la ranura **MicroSD integrada** al arrancar. No tiene soporte para flasheo directo vía USB (DFU o serial upload).
+> - **Para qué sirve el cable USB:** El puerto USB se utiliza para comunicación serie en vivo una vez que el firmware ya está corriendo (enviar comandos G-code desde OctoPrint, Pronterface, Cura o consola serial a 115200 baudios).
+> - **Método recomendado y estándar:** El método nativo mediante tarjeta **MicroSD** es el más rápido, seguro y no requiere herramientas adicionales.
+> - **Pantalla DW7.4.6:** La pantalla tampoco se puede actualizar por USB; cuenta con su propia ranura MicroSD trasera exclusiva para su paquete `DWIN_SET`.
 
 ### 1. Pantalla DW7.4.6 (`build/display_DW7.4.6/`):
 1. Formatea una tarjeta MicroSD (máximo 8GB o 16GB) en **FAT32** con tamaño de unidad de asignación de **4096 bytes (4 KB)**.
