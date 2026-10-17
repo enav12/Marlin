@@ -1,7 +1,7 @@
-# Plan Maestro Incremental: Marlin 2.1.2.9 + Creality v4.2.7 + Pantalla DW7.4.6
+# Plan Maestro Incremental: Marlin 2.1.2.9 + Creality v4.2.7 + Pantalla DW7.4.6 + CR Touch
 
 > [!NOTE]
-> Este documento es el **Plan Maestro Incremental**. Cada nueva solicitud o requerimiento se integrará a este plan, actualizando el estado de cada tarea y registrando el avance hasta la implementación final.
+> Este documento es el **Plan Maestro Incremental**. Cada nueva solicitud o requerimiento se integra a este plan, actualizando el estado de cada tarea y registrando el avance continuo del proyecto.
 
 ---
 
@@ -10,11 +10,12 @@
 | # | Solicitud | Alcance | Estado |
 | :-: | :--- | :--- | :-: |
 | **1** | Descargar Marlin oficial en `enav12/Marlin` | Obtención de Marlin 2.1.2.9 y subida al repositorio remoto personal en GitHub. | ✅ **Implementado** |
-| **2** | Actualizar código para placa Creality v4.2.7 | Configuración de motherboard, drivers silenciosos TMC2208 Standalone, entorno PlatformIO y puertos seriales. | ⏳ **Planificado** |
-| **3** | Subproyecto modular para pantalla DW7.4.6 | Crear proyecto aislado para pantalla DWIN con assets `DWIN_SET`, conexionado EXP1 y parches de compatibilidad. | 🟡 **Parcialmente Implementado** (Estructura lista, pendiente integración activa) |
+| **2** | Actualizar código para placa Creality v4.2.7 | Configuración de motherboard, drivers silenciosos TMC2208 Standalone, entorno PlatformIO y puertos seriales. | ✅ **Implementado** |
+| **3** | Subproyecto modular para pantalla DW7.4.6 | Crear proyecto aislado para pantalla DWIN con assets `DWIN_SET`, conexionado EXP1 y parches de compatibilidad. | ✅ **Implementado** |
 | **4** | Flujo de planificación incremental continua | Adopción del Plan Maestro acumulativo que evoluciona con cada instrucción del usuario. | ✅ **Implementado** |
 | **5** | Compatibilidad y estrategia de actualización con futuras versiones de Marlin | Garantizar que el proyecto pueda recibir actualizaciones oficiales (`upstream`) sin romper la placa ni el subproyecto de pantalla. | ✅ **Definido y Documentado** |
 | **6** | Centralización de proyectos a instalar en carpeta `build/` | Agrupar los proyectos/paquetes instalables en `build/` (`build/creality_v427/` y `build/display_DW7.4.6/`). | ✅ **Implementado** |
+| **7** | Integración de sensor de auto-nivelación **CR Touch** | Habilitar `BLTOUCH`, uso de sonda para Z homing en puerto dedicado de 5 pines (PB1/PB0), `Z_SAFE_HOMING`, nivelación bilineal 3x3 y babystepping dinámico con guardado en EEPROM. | ✅ **Implementado** |
 
 ---
 
@@ -22,21 +23,23 @@
 
 ```mermaid
 gantt
-    title Progreso del Proyecto Marlin (Creality 4.2.7 + DW7.4.6)
+    title Progreso del Proyecto Marlin (Creality 4.2.7 + DW7.4.6 + CR Touch)
     dateFormat  X
     axisFormat %s
     section Fase 1: Repositorio
     Descarga Marlin 2.1.2.9 y Push a origin        :done, 0, 10
     section Fase 2: Placa Creality 4.2.7
     Definición de plan de placa                    :done, 10, 20
-    Edición de Configuration.h & platformio.ini    :active, 20, 40
+    Edición de Configuration.h & platformio.ini    :done, 20, 40
     section Fase 3: Proyectos en build/
     Creación de estructura build/ y DW7.4.6        :done, 20, 35
-    Integración UART3 / DGUS en Marlin             :crit, 40, 60
-    section Fase 4: Validación y Flasheo
-    Prueba de compilación PlatformIO               :60, 80
-    Generación de binarios en build/               :80, 100
-    section Fase 5: Mantenimiento y Upgrades
+    Integración UART3 / DGUS en Marlin             :done, 35, 50
+    section Fase 4: Sensor CR Touch
+    BLTOUCH + Z_SAFE_HOMING + Babystepping + EEPROM:done, 50, 70
+    section Fase 5: Validación y Flasheo
+    Configuración de compilación PlatformIO        :done, 70, 85
+    Generación y despliegue a build/               :active, 85, 100
+    section Fase 6: Mantenimiento y Upgrades
     Estrategia de actualización upstream           :done, 30, 50
 ```
 
@@ -49,68 +52,75 @@ gantt
 - [x] Descarga de la versión estable oficial Marlin 2.1.2.9.
 - [x] Subida limpia de la rama `main` al repositorio remoto personal en GitHub.
 
-### Fase 2: Configuración para Placa Creality v4.2.7 [40%]
+### Fase 2: Configuración para Placa Creality v4.2.7 [100%]
 - [x] Análisis de asignación de pines y hardware de Creality 4.2.7 (`pins_CREALITY_V427.h`).
-- [x] Diseño del plan de migración técnica ([plan_creality_4_2_7.md](file:///C:/Users/eduar/.gemini/antigravity-ide/brain/0e373af5-0ab1-4f4d-8c15-fe5c2153bc0e/plan_creality_4_2_7.md)).
-- [ ] **Por aplicar en código**:
-  - [ ] En [`platformio.ini`](file:///c:/Enavarrete/Proyectos/Marlin/platformio.ini): definir `default_envs = STM32F103RE_creality`.
-  - [ ] En [`Marlin/Configuration.h`](file:///c:/Enavarrete/Proyectos/Marlin/Marlin/Configuration.h):
-    - [ ] `#define MOTHERBOARD BOARD_CREALITY_V427`
-    - [ ] `#define SERIAL_PORT 1` (USB CH340)
-    - [ ] `#define BAUDRATE 115200`
-    - [ ] Drivers TMC2208 Standalone en X, Y, Z, E0 (`TMC2208_STANDALONE`).
-    - [ ] Inversión de ejes para TMC2208 (`INVERT_Z_DIR true`, etc.).
-    - [ ] Dimensiones y pasos por mm del chasis.
+- [x] En [`platformio.ini`](file:///c:/Enavarrete/Proyectos/Marlin/platformio.ini): definido `default_envs = STM32F103RE_creality`.
+- [x] En [`Marlin/Configuration.h`](file:///c:/Enavarrete/Proyectos/Marlin/Marlin/Configuration.h):
+  - [x] `#define MOTHERBOARD BOARD_CREALITY_V427`
+  - [x] `#define SERIAL_PORT 1` (USB CH340 a 115200 baudios)
+  - [x] Drivers TMC2208 Standalone en X, Y, Z, E0 (`TMC2208_STANDALONE`).
+  - [x] Inversión de dirección para TMC2208 (`INVERT_Y_DIR false`, `INVERT_Z_DIR true`).
+  - [x] Pasos por mm calibrados: `{ 80, 80, 400, 93 }`.
+  - [x] Dimensiones de cama: 220 x 220 x 250 mm.
 
-### Fase 3: Proyectos de Instalación en `build/` [85%]
-- [x] Creación de carpeta de instalación centralizada [`build/`](file:///c:/Enavarrete/Proyectos/Marlin/build).
-- [x] Reubicación del subproyecto de pantalla a [`build/display_DW7.4.6/`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_DW7.4.6).
-- [x] Documentación de formato de MicroSD en [`build/display_DW7.4.6/DWIN_SET/README_DWIN_SET.md`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_DW7.4.6/DWIN_SET/README_DWIN_SET.md).
-- [x] Esquema de conexionado EXP1 en [`build/display_DW7.4.6/hardware/pinout_creality_v427_dwin.md`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_DW7.4.6/hardware/pinout_creality_v427_dwin.md).
-- [x] Parches de configuración en [`build/display_DW7.4.6/marlin_integration/Configuration_DW7.4.6_patch.h`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_DW7.4.6/marlin_integration/Configuration_DW7.4.6_patch.h).
-- [x] Creación del proyecto de instalación de placa base en [`build/creality_v427/`](file:///c:/Enavarrete/Proyectos/Marlin/build/creality_v427).
-- [ ] Empaquetado final de archivos binarios e iconos (`DWIN_SET`) para la pantalla.
+### Fase 3: Proyectos de Instalación en `build/` [100%]
+- [x] Carpeta de instalación centralizada [`build/`](file:///c:/Enavarrete/Proyectos/Marlin/build).
+- [x] Subproyecto de pantalla en [`build/display_DW7.4.6/`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_DW7.4.6).
+- [x] Documentación de MicroSD (FAT32, clúster 4096) en [`build/display_DW7.4.6/DWIN_SET/README_DWIN_SET.md`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_DW7.4.6/DWIN_SET/README_DWIN_SET.md).
+- [x] Diagrama de conexionado EXP1 (UART3 PB10/PB11) en [`build/display_DW7.4.6/hardware/pinout_creality_v427_dwin.md`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_DW7.4.6/hardware/pinout_creality_v427_dwin.md).
+- [x] Guía de integración en [`build/display_DW7.4.6/marlin_integration/Configuration_DW7.4.6_patch.h`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_DW7.4.6/marlin_integration/Configuration_DW7.4.6_patch.h).
+- [x] Carpeta receptora de binario compilado en [`build/creality_v427/`](file:///c:/Enavarrete/Proyectos/Marlin/build/creality_v427).
 
-### Fase 4: Integración Conjunta (Placa 4.2.7 + Pantalla DW7.4.6) [0%]
-- [ ] Habilitar comunicación dual en Marlin:
-  - `SERIAL_PORT 1` (USB a 115200)
-  - `SERIAL_PORT_2 3` (USART3 en pines PB10/PB11 para el display DWIN)
-- [ ] Activar controlador de pantalla en Marlin (`DGUS_LCD_UI_ORIGIN` o compatible con DW7.4.6).
-- [ ] Definir `LCD_SERIAL_PORT 3` en `Configuration_adv.h`.
-- [ ] Verificar que no existan conflictos de interrupciones o buffers de memoria entre ambos puertos.
+### Fase 4: Integración Pantalla DW7.4.6 + Sensor CR Touch [100%]
+- [x] **Pantalla DWIN DW7.4.6**:
+  - [x] `#define DGUS_LCD_UI_ORIGIN` en `Configuration.h`.
+  - [x] `#define LCD_SERIAL_PORT 3` (USART3 en pines EXP1 PB10/PB11) a 115200 en `Configuration_adv.h`.
+  - [x] Resolución de verificación de puertos en SanityCheck de Marlin (sin conflicto con `SERIAL_PORT_2`).
+- [x] **Sensor CR Touch**:
+  - [x] Comentado `Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN` para utilizar el puerto dedicado de 5 pines (PB1 / PB0).
+  - [x] `#define USE_PROBE_FOR_Z_HOMING` activo.
+  - [x] `#define BLTOUCH` habilitado (emulación estándar compatible con el sensor óptico del CR Touch).
+  - [x] Offset de tobera a sonda Creality: `{ -44, -10, 0 }`.
+  - [x] Auto Bed Leveling bilineal (`AUTO_BED_LEVELING_BILINEAR`) con `RESTORE_LEVELING_AFTER_G28`.
+  - [x] `#define Z_SAFE_HOMING` activo para realizar homing de Z en el centro de la cama (110, 110 mm).
+  - [x] `#define BABYSTEPPING` y `#define BABYSTEP_ZPROBE_OFFSET` activos en `Configuration_adv.h`.
+  - [x] `#define EEPROM_SETTINGS` y `#define EEPROM_AUTO_INIT` para guardar el Z-Offset de forma permanente en la placa.
 
-### Fase 5: Validación, Compilación y Salida a `build/` [0%]
-- [ ] Compilar el firmware con PlatformIO para el entorno `STM32F103RE_creality`.
-- [ ] Validar ausencia de errores y advertencias críticas.
-- [ ] Copiar el binario generado `.bin` en [`build/creality_v427/`](file:///c:/Enavarrete/Proyectos/Marlin/build/creality_v427).
-- [ ] Subir la versión compilada y configurada al repositorio GitHub `enav12/Marlin`.
+### Fase 5: Validación, Compilación y Flasheo [En Progreso]
+- [x] Configuración del entorno de compilación `STM32F103RE_creality` en `platformio.ini`.
+- [ ] Compilación del firmware en VS Code con PlatformIO o Auto Build Marlin.
+- [ ] Colocación del archivo compilado `firmware-YYYYMMDD-HHMMSS.bin` en [`build/creality_v427/`](file:///c:/Enavarrete/Proyectos/Marlin/build/creality_v427).
+- [ ] Flasheo de la pantalla MicroSD (`DWIN_SET` con clúster de 4096 bytes).
+- [ ] Flasheo de la placa Creality v4.2.7 vía MicroSD.
 
 ### Fase 6: Mantenimiento y Actualizaciones Futuras (Upstream) [100%]
 - [x] **Arquitectura desacoplada**: Todo lo instalable reside en `build/`, fuera de `Marlin/`.
 - [x] **Flujo Git configurado**:
   - `origin`: tu repositorio personal ([enav12/Marlin](https://github.com/enav12/Marlin)).
   - `upstream`: repositorio oficial ([MarlinFirmware/Marlin](https://github.com/MarlinFirmware/Marlin)).
-- [x] **Procedimiento de actualización documentado** para futuras versiones (ej. Marlin 2.1.3+ o 2.2.x).
+- [x] **Procedimiento de actualización documentado** para futuras versiones.
 
 ---
 
-## 4. Procedimiento para Actualizar Marlin en el Futuro
+## 4. Guía de Flasheo e Instalación de los Proyectos en `build/`
 
-Cuando el equipo oficial de Marlin publique una nueva versión (ej. `2.1.3` o superior):
+### 1. Pantalla DW7.4.6 (`build/display_DW7.4.6/`):
+1. Formatea una tarjeta MicroSD (máximo 8GB o 16GB) en **FAT32** con tamaño de unidad de asignación de **4096 bytes (4 KB)**.
+2. Copia la carpeta `DWIN_SET` directamente a la raíz de la MicroSD.
+3. Inserta la MicroSD en la ranura posterior de la pantalla DWIN apagada.
+4. Enciende la impresora. La pantalla cambiará de azul a naranja/rojo y mostrará `END!`.
+5. Apaga la impresora y retira la MicroSD.
 
-```bash
-# 1. Obtener las últimas etiquetas y ramas oficiales
-git fetch upstream
+### 2. Placa Creality v4.2.7 (`build/creality_v427/`):
+1. Compila el firmware usando **PlatformIO** (o la extensión **Auto Build Marlin** en VS Code) seleccionando el entorno `STM32F103RE_creality`.
+2. El archivo resultante `.pio/build/STM32F103RE_creality/firmware.bin` lo guardas en [`build/creality_v427/`](file:///c:/Enavarrete/Proyectos/Marlin/build/creality_v427).
+3. Formatea una tarjeta MicroSD en **FAT32**.
+4. Copia el archivo binario renombrándolo (ej: `firmware_427_01.bin` — el gestor de arranque de Creality no flashea archivos con el mismo nombre consecutivo).
+5. Con la impresora apagada, inserta la MicroSD en la placa Creality.
+6. Enciende la impresora; tardará entre 10 y 15 segundos en cargar el nuevo firmware.
 
-# 2. Fusionar la nueva etiqueta o rama en tu proyecto
-git merge 2.1.3   # o la versión que desees incorporar
-
-# 3. Revisar únicamente Configuration.h si Marlin agregó nuevas opciones
-# (Tu carpeta build/ permanecerá intacta al 100%)
-
-# 4. Probar compilación y subir a tu repositorio
-pio run
-git push origin main
-```
-
-
+### 3. Calibración del CR Touch tras el primer inicio:
+1. Enciende la impresora y ejecuta `G28` (Auto Home) desde la pantalla o terminal serial. La impresora llevará X e Y al inicio, luego centrará el hotend y desplegará el pin del CR Touch para medir el eje Z en el centro de la cama.
+2. Realiza un nivelado de cama con el comando `G29` o desde el menú de la pantalla DWIN.
+3. Ajusta el Z-Offset con Babystepping durante la primera capa de prueba.
+4. Guarda los ajustes en la memoria con `M500` o la opción **Guardar Configuración** de la pantalla.
