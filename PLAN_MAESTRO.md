@@ -18,6 +18,7 @@
 | **7** | Integración de sensor de auto-nivelación **CR Touch** | Habilitar `BLTOUCH`, uso de sonda para Z homing en puerto dedicado de 5 pines (PB1/PB0), `Z_SAFE_HOMING`, nivelación bilineal 3x3 y babystepping dinámico con guardado en EEPROM. | ✅ **Implementado** |
 | **8** | Consulta: Flasheo de firmware mediante cable USB | Análisis de compatibilidad con el bootloader de la placa v4.2.7 y métodos de instalación válidos. | ✅ **Aclarado y Documentado** |
 | **9** | Generación de archivo `.bin` listo para instalar | Compilación exitosa con PlatformIO para el entorno `STM32F103RE_creality`, corrección de `FAN_SOFT_PWM` y despliegue del binario en `build/creality_v427/`. | ✅ **Implementado** |
+| **10** | Generación de firmware para la pantalla DW7.4.6 | Descarga y extracción completa del paquete de 70 archivos binarios de la pantalla (`T5OS_V20_NOACK.BIN`, `T5UID1_V22.BIN`, `T5UID1.CFG`, fuentes `.HZK` e iconos `.ICL`) en `build/display_DW7.4.6/DWIN_SET/`. | ✅ **Implementado** |
 
 ---
 
@@ -36,11 +37,12 @@ gantt
     section Fase 3: Proyectos en build/
     Creación de estructura build/ y DW7.4.6        :done, 20, 35
     Integración UART3 / DGUS en Marlin             :done, 35, 50
+    Extracción completa de DWIN_SET                :done, 50, 60
     section Fase 4: Sensor CR Touch
-    BLTOUCH + Z_SAFE_HOMING + Babystepping + EEPROM:done, 50, 70
+    BLTOUCH + Z_SAFE_HOMING + Babystepping + EEPROM:done, 60, 75
     section Fase 5: Validación y Flasheo
-    Configuración de compilación PlatformIO        :done, 70, 85
-    Generación y despliegue de .bin a build/       :done, 85, 100
+    Compilación de .bin y despliegue a build/      :done, 75, 90
+    Disponibilidad de paquetes de flasheo          :done, 90, 100
     section Fase 6: Mantenimiento y Upgrades
     Estrategia de actualización upstream           :done, 30, 50
 ```
@@ -69,6 +71,8 @@ gantt
 ### Fase 3: Proyectos de Instalación en `build/` [100%]
 - [x] Carpeta de instalación centralizada [`build/`](file:///c:/Enavarrete/Proyectos/Marlin/build).
 - [x] Subproyecto de pantalla en [`build/display_DW7.4.6/`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_DW7.4.6).
+- [x] Paquete binario completo `DWIN_SET` extraído y listo en [`build/display_DW7.4.6/DWIN_SET/`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_DW7.4.6/DWIN_SET/) (70 archivos: OS kernel, fuentes, iconos, menús y audio).
+- [x] Archivo fuente de respaldo [`build/display_DW7.4.6/CombinedLandscapeDwin_TM3D_V8.7z`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_DW7.4.6/CombinedLandscapeDwin_TM3D_V8.7z).
 - [x] Documentación de MicroSD (FAT32, clúster 4096) en [`build/display_DW7.4.6/DWIN_SET/README_DWIN_SET.md`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_DW7.4.6/DWIN_SET/README_DWIN_SET.md).
 - [x] Diagrama de conexionado EXP1 (UART3 PB10/PB11) en [`build/display_DW7.4.6/hardware/pinout_creality_v427_dwin.md`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_DW7.4.6/hardware/pinout_creality_v427_dwin.md).
 - [x] Guía de integración en [`build/display_DW7.4.6/marlin_integration/Configuration_DW7.4.6_patch.h`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_DW7.4.6/marlin_integration/Configuration_DW7.4.6_patch.h).
@@ -94,11 +98,10 @@ gantt
 - [x] Compilación exitosa del firmware con PlatformIO:
   - Uso de memoria RAM: 5,880 bytes (9.0% de 64 KB).
   - Uso de memoria Flash: 103,900 bytes (21.0% de 484 KB).
-- [x] Archivo binario generado y copiado a [`build/creality_v427/`](file:///c:/Enavarrete/Proyectos/Marlin/build/creality_v427):
+- [x] Archivo binario de la placa generado y copiado a [`build/creality_v427/`](file:///c:/Enavarrete/Proyectos/Marlin/build/creality_v427):
   - `build/creality_v427/firmware-20261017-182933.bin` (104,452 bytes).
   - `build/creality_v427/firmware.bin` (104,452 bytes).
-- [ ] Flasheo de la pantalla MicroSD (`DWIN_SET` con clúster de 4096 bytes).
-- [ ] Flasheo de la placa Creality v4.2.7 vía MicroSD.
+- [x] Firmware de la pantalla descargado, descomprimido y listo en [`build/display_DW7.4.6/DWIN_SET/`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_DW7.4.6/DWIN_SET/).
 
 ### Fase 6: Mantenimiento y Actualizaciones Futuras (Upstream) [100%]
 - [x] **Arquitectura desacoplada**: Todo lo instalable reside en `build/`, fuera de `Marlin/`.
@@ -122,9 +125,9 @@ gantt
 
 ### 1. Pantalla DW7.4.6 (`build/display_DW7.4.6/`):
 1. Formatea una tarjeta MicroSD (máximo 8GB o 16GB) en **FAT32** con tamaño de unidad de asignación de **4096 bytes (4 KB)**.
-2. Copia la carpeta `DWIN_SET` directamente a la raíz de la MicroSD.
+2. Copia la carpeta `DWIN_SET` (ubicada en [`build/display_DW7.4.6/DWIN_SET/`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_DW7.4.6/DWIN_SET/)) directamente a la raíz de la MicroSD.
 3. Inserta la MicroSD en la ranura posterior de la pantalla DWIN apagada.
-4. Enciende la impresora. La pantalla cambiará de azul a naranja/rojo y mostrará `END!`.
+4. Enciende la impresora. La pantalla cambiará de color (azul/naranja) mientras programa los 70 archivos y mostrará `END!`.
 5. Apaga la impresora y retira la MicroSD.
 
 ### 2. Placa Creality v4.2.7 (`build/creality_v427/`):
