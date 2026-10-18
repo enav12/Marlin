@@ -21,6 +21,12 @@
  */
 #pragma once
 
+#if __has_include("../PRINTER_CONFIG.h")
+  #include "../PRINTER_CONFIG.h"
+#elif __has_include("PRINTER_CONFIG.h")
+  #include "PRINTER_CONFIG.h"
+#endif
+
 /**
  * Configuration.h
  *
@@ -114,7 +120,11 @@
  *
  * :[2400, 9600, 19200, 38400, 57600, 115200, 250000, 500000, 1000000]
  */
-#define BAUDRATE 115200
+#ifdef CONFIG_SERIAL_BAUDRATE
+  #define BAUDRATE CONFIG_SERIAL_BAUDRATE
+#else
+  #define BAUDRATE 115200
+#endif
 
 //#define BAUD_RATE_GCODE     // Enable G-code M575 to set the baud rate
 
@@ -137,8 +147,11 @@
 // Enable the Bluetooth serial interface on AT90USB devices
 //#define BLUETOOTH
 
-// Name displayed in the LCD "Ready" message and Info menu
-#define CUSTOM_MACHINE_NAME "Ender-3 4.2.7"
+#ifdef CONFIG_MACHINE_NAME
+  #define CUSTOM_MACHINE_NAME CONFIG_MACHINE_NAME
+#else
+  #define CUSTOM_MACHINE_NAME "Ender-3 4.2.7"
+#endif
 
 // Printer's unique ID, used by some programs to differentiate between machines.
 // Choose your own or use a service like https://www.uuidgenerator.net/version4
@@ -161,9 +174,21 @@
  *          TMC5130, TMC5130_STANDALONE, TMC5160, TMC5160_STANDALONE
  * :['A4988', 'A5984', 'DRV8825', 'LV8729', 'TB6560', 'TB6600', 'TMC2100', 'TMC2130', 'TMC2130_STANDALONE', 'TMC2160', 'TMC2160_STANDALONE', 'TMC2208', 'TMC2208_STANDALONE', 'TMC2209', 'TMC2209_STANDALONE', 'TMC26X', 'TMC26X_STANDALONE', 'TMC2660', 'TMC2660_STANDALONE', 'TMC5130', 'TMC5130_STANDALONE', 'TMC5160', 'TMC5160_STANDALONE']
  */
-#define X_DRIVER_TYPE  TMC2208_STANDALONE
-#define Y_DRIVER_TYPE  TMC2208_STANDALONE
-#define Z_DRIVER_TYPE  TMC2208_STANDALONE
+#ifdef CONFIG_DRIVER_X
+  #define X_DRIVER_TYPE CONFIG_DRIVER_X
+#else
+  #define X_DRIVER_TYPE TMC2208_STANDALONE
+#endif
+#ifdef CONFIG_DRIVER_Y
+  #define Y_DRIVER_TYPE CONFIG_DRIVER_Y
+#else
+  #define Y_DRIVER_TYPE TMC2208_STANDALONE
+#endif
+#ifdef CONFIG_DRIVER_Z
+  #define Z_DRIVER_TYPE CONFIG_DRIVER_Z
+#else
+  #define Z_DRIVER_TYPE TMC2208_STANDALONE
+#endif
 //#define X2_DRIVER_TYPE A4988
 //#define Y2_DRIVER_TYPE A4988
 //#define Z2_DRIVER_TYPE A4988
@@ -175,7 +200,11 @@
 //#define U_DRIVER_TYPE  A4988
 //#define V_DRIVER_TYPE  A4988
 //#define W_DRIVER_TYPE  A4988
-#define E0_DRIVER_TYPE TMC2208_STANDALONE
+#ifdef CONFIG_DRIVER_E0
+  #define E0_DRIVER_TYPE CONFIG_DRIVER_E0
+#else
+  #define E0_DRIVER_TYPE TMC2208_STANDALONE
+#endif
 //#define E1_DRIVER_TYPE A4988
 //#define E2_DRIVER_TYPE A4988
 //#define E3_DRIVER_TYPE A4988
@@ -634,7 +663,11 @@
 // Above this temperature the heater will be switched off.
 // This can protect components from overheating, but NOT from shorts and failures.
 // (Use MINTEMP for thermistor short/failure protection.)
-#define HEATER_0_MAXTEMP 275
+#ifdef CONFIG_HOTEND_MAXTEMP
+  #define HEATER_0_MAXTEMP CONFIG_HOTEND_MAXTEMP
+#else
+  #define HEATER_0_MAXTEMP 275
+#endif
 #define HEATER_1_MAXTEMP 275
 #define HEATER_2_MAXTEMP 275
 #define HEATER_3_MAXTEMP 275
@@ -642,7 +675,11 @@
 #define HEATER_5_MAXTEMP 275
 #define HEATER_6_MAXTEMP 275
 #define HEATER_7_MAXTEMP 275
-#define BED_MAXTEMP      150
+#ifdef CONFIG_BED_MAXTEMP
+  #define BED_MAXTEMP      CONFIG_BED_MAXTEMP
+#else
+  #define BED_MAXTEMP      125
+#endif
 #define CHAMBER_MAXTEMP  60
 
 /**
@@ -1196,7 +1233,11 @@
  * Override with M92
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 400, 93 }
+#if defined(CONFIG_STEPS_X) && defined(CONFIG_STEPS_Y) && defined(CONFIG_STEPS_Z) && defined(CONFIG_STEPS_E)
+  #define DEFAULT_AXIS_STEPS_PER_UNIT { CONFIG_STEPS_X, CONFIG_STEPS_Y, CONFIG_STEPS_Z, CONFIG_STEPS_E }
+#else
+  #define DEFAULT_AXIS_STEPS_PER_UNIT { 80, 80, 400, 93 }
+#endif
 
 /**
  * Default Max Feed Rate (linear=mm/s, rotational=°/s)
@@ -1302,10 +1343,13 @@
  * The probe replaces the Z-MIN endstop and is used for Z homing.
  * (Automatically enables USE_PROBE_FOR_Z_HOMING.)
  */
-//#define Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN
-
-// Force the use of the probe for Z-axis homing
-#define USE_PROBE_FOR_Z_HOMING
+#if CONFIG_ENABLE_CR_TOUCH
+  //#define Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN
+  #define USE_PROBE_FOR_Z_HOMING
+#else
+  #define Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN
+  //#define USE_PROBE_FOR_Z_HOMING
+#endif
 
 /**
  * Z_MIN_PROBE_PIN
@@ -1356,10 +1400,9 @@
   //#define Z_SERVO_ANGLES { 70, 0 }      // Z Servo Deploy and Stow angles
 #endif
 
-/**
- * The BLTouch probe uses a Hall effect sensor and emulates a servo.
- */
-#define BLTOUCH
+#if CONFIG_ENABLE_CR_TOUCH
+  #define BLTOUCH
+#endif
 
 /**
  * MagLev V4 probe by MDD
@@ -1511,7 +1554,11 @@
  *     |    [-]    |
  *     O-- FRONT --+
  */
-#define NOZZLE_TO_PROBE_OFFSET { -44, -10, 0 }
+#if defined(CONFIG_PROBE_OFFSET_X) && defined(CONFIG_PROBE_OFFSET_Y) && defined(CONFIG_PROBE_OFFSET_Z)
+  #define NOZZLE_TO_PROBE_OFFSET { CONFIG_PROBE_OFFSET_X, CONFIG_PROBE_OFFSET_Y, CONFIG_PROBE_OFFSET_Z }
+#else
+  #define NOZZLE_TO_PROBE_OFFSET { -44, -10, 0 }
+#endif
 
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
@@ -1669,10 +1716,21 @@
 
 // @section motion
 
-// Invert the stepper direction. Change (or reverse the motor connector) if an axis goes the wrong way.
-#define INVERT_X_DIR false
-#define INVERT_Y_DIR false
-#define INVERT_Z_DIR true
+#ifdef CONFIG_INVERT_X_DIR
+  #define INVERT_X_DIR CONFIG_INVERT_X_DIR
+#else
+  #define INVERT_X_DIR false
+#endif
+#ifdef CONFIG_INVERT_Y_DIR
+  #define INVERT_Y_DIR CONFIG_INVERT_Y_DIR
+#else
+  #define INVERT_Y_DIR false
+#endif
+#ifdef CONFIG_INVERT_Z_DIR
+  #define INVERT_Z_DIR CONFIG_INVERT_Z_DIR
+#else
+  #define INVERT_Z_DIR true
+#endif
 //#define INVERT_I_DIR false
 //#define INVERT_J_DIR false
 //#define INVERT_K_DIR false
@@ -1683,7 +1741,11 @@
 // @section extruder
 
 // For direct drive extruder v9 set to true, for geared extruder set to false.
-#define INVERT_E0_DIR false
+#ifdef CONFIG_INVERT_E0_DIR
+  #define INVERT_E0_DIR CONFIG_INVERT_E0_DIR
+#else
+  #define INVERT_E0_DIR false
+#endif
 #define INVERT_E1_DIR false
 #define INVERT_E2_DIR false
 #define INVERT_E3_DIR false
@@ -1724,8 +1786,16 @@
 // @section geometry
 
 // The size of the printable area
-#define X_BED_SIZE 220
-#define Y_BED_SIZE 220
+#ifdef CONFIG_BED_X
+  #define X_BED_SIZE CONFIG_BED_X
+#else
+  #define X_BED_SIZE 220
+#endif
+#ifdef CONFIG_BED_Y
+  #define Y_BED_SIZE CONFIG_BED_Y
+#else
+  #define Y_BED_SIZE 220
+#endif
 
 // Travel limits (linear=mm, rotational=°) after homing, corresponding to endstop positions.
 #define X_MIN_POS 0
@@ -1733,7 +1803,11 @@
 #define Z_MIN_POS 0
 #define X_MAX_POS X_BED_SIZE
 #define Y_MAX_POS Y_BED_SIZE
-#define Z_MAX_POS 250
+#ifdef CONFIG_BED_Z
+  #define Z_MAX_POS CONFIG_BED_Z
+#else
+  #define Z_MAX_POS 250
+#endif
 //#define I_MIN_POS 0
 //#define I_MAX_POS 50
 //#define J_MIN_POS 0
@@ -1905,22 +1979,10 @@
  */
 //#define AUTO_BED_LEVELING_3POINT
 //#define AUTO_BED_LEVELING_LINEAR
-#define AUTO_BED_LEVELING_BILINEAR
-//#define AUTO_BED_LEVELING_UBL
-//#define MESH_BED_LEVELING
-
-/**
- * Commands to execute at the end of G29 probing.
- * Useful to retract or move the Z probe out of the way.
- */
-//#define Z_PROBE_END_SCRIPT "G1 Z10 F12000\nG1 X15 Y330\nG1 Z0.5\nG1 Z10"
-
-/**
- * Normally G28 leaves leveling disabled on completion. Enable one of
- * these options to restore the prior leveling state or to always enable
- * leveling immediately after G28.
- */
-#define RESTORE_LEVELING_AFTER_G28
+#if CONFIG_ENABLE_CR_TOUCH
+  #define AUTO_BED_LEVELING_BILINEAR
+  #define RESTORE_LEVELING_AFTER_G28
+#endif
 //#define ENABLE_LEVELING_AFTER_G28
 
 /**
@@ -1991,7 +2053,11 @@
 #if EITHER(AUTO_BED_LEVELING_LINEAR, AUTO_BED_LEVELING_BILINEAR)
 
   // Set the number of grid points per dimension.
-  #define GRID_MAX_POINTS_X 3
+  #ifdef CONFIG_PROBING_GRID_POINTS
+    #define GRID_MAX_POINTS_X CONFIG_PROBING_GRID_POINTS
+  #else
+    #define GRID_MAX_POINTS_X 3
+  #endif
   #define GRID_MAX_POINTS_Y GRID_MAX_POINTS_X
 
   // Probe along the Y axis, advancing X after each column
@@ -2122,7 +2188,9 @@
  * - Allows Z homing only when XY positions are known and trusted.
  * - If stepper drivers sleep, XY homing may be required again before Z homing.
  */
-#define Z_SAFE_HOMING
+#if CONFIG_ENABLE_CR_TOUCH
+  #define Z_SAFE_HOMING
+#endif
 
 #if ENABLED(Z_SAFE_HOMING)
   #define Z_SAFE_HOMING_X_POINT X_CENTER  // (mm) X point for Z homing
@@ -2208,13 +2276,11 @@
  *   M501 - Read settings from EEPROM. (i.e., Throw away unsaved changes)
  *   M502 - Revert settings to "factory" defaults. (Follow with M500 to init the EEPROM.)
  */
-#define EEPROM_SETTINGS     // Persistent storage with M500 and M501
-//#define DISABLE_M503        // Saves ~2700 bytes of flash. Disable for release!
-#define EEPROM_CHITCHAT       // Give feedback on EEPROM commands. Disable to save flash.
-#define EEPROM_BOOT_SILENT    // Keep M503 quiet and only give errors during first load
-#if ENABLED(EEPROM_SETTINGS)
+#if CONFIG_ENABLE_EEPROM
+  #define EEPROM_SETTINGS     // Persistent storage with M500 and M501
+  #define EEPROM_CHITCHAT       // Give feedback on EEPROM commands. Disable to save flash.
+  #define EEPROM_BOOT_SILENT    // Keep M503 quiet and only give errors during first load
   #define EEPROM_AUTO_INIT  // Init EEPROM automatically on any errors.
-  //#define EEPROM_INIT_NOW   // Init EEPROM on first boot after a new build.
 #endif
 
 // @section host
@@ -3011,7 +3077,9 @@
  *  - Plug the microSD card into the back of the display.
  *  - Boot the display and wait for the update to complete.
  */
-#define DGUS_LCD_UI_ORIGIN
+#if CONFIG_ENABLE_DWIN_DW746
+  #define DGUS_LCD_UI_ORIGIN
+#endif
 //#define DGUS_LCD_UI_FYSETC
 //#define DGUS_LCD_UI_HIPRECY
 //#define DGUS_LCD_UI_MKS

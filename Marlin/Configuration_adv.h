@@ -21,6 +21,12 @@
  */
 #pragma once
 
+#if __has_include("../PRINTER_CONFIG.h")
+  #include "../PRINTER_CONFIG.h"
+#elif __has_include("PRINTER_CONFIG.h")
+  #include "PRINTER_CONFIG.h"
+#endif
+
 /**
  * Configuration_adv.h
  *
@@ -1862,7 +1868,11 @@
 // Additional options for DGUS / DWIN displays
 //
 #if HAS_DGUS_LCD
-  #define LCD_SERIAL_PORT 3
+  #ifdef CONFIG_LCD_SERIAL_PORT
+    #define LCD_SERIAL_PORT CONFIG_LCD_SERIAL_PORT
+  #else
+    #define LCD_SERIAL_PORT 3
+  #endif
   #define LCD_BAUDRATE 115200
 
   #define DGUS_RX_BUFFER_SIZE 128
@@ -2065,7 +2075,9 @@
  *
  * Warning: Does not respect endstops!
  */
-#define BABYSTEPPING
+#if CONFIG_ENABLE_BABYSTEPPING
+  #define BABYSTEPPING
+#endif
 #if ENABLED(BABYSTEPPING)
   //#define INTEGRATED_BABYSTEPPING         // EXPERIMENTAL integration of babystepping into the Stepper ISR
   //#define BABYSTEP_WITHOUT_HOMING
@@ -2112,12 +2124,14 @@
  *
  * See https://marlinfw.org/docs/features/lin_advance.html for full instructions.
  */
-//#define LIN_ADVANCE
+#if CONFIG_ENABLE_LINEAR_ADVANCE
+  #define LIN_ADVANCE
+#endif
 #if ENABLED(LIN_ADVANCE)
   #if ENABLED(DISTINCT_E_FACTORS)
-    #define ADVANCE_K { 0.22 }    // (mm) Compression length per 1mm/s extruder speed, per extruder
+    #define ADVANCE_K { CONFIG_LIN_ADVANCE_K }
   #else
-    #define ADVANCE_K 0.22        // (mm) Compression length applying to all extruders
+    #define ADVANCE_K CONFIG_LIN_ADVANCE_K
   #endif
   //#define ADVANCE_K_EXTRA       // Add a second linear advance constant, configurable with M900 L.
   //#define LA_DEBUG              // Print debug information to serial during operation. Disable for production use.
