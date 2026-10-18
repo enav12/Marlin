@@ -82,8 +82,10 @@
 // Cantidad de puntos de palpado por eje para la malla de nivelación (3 = matriz 3x3 de 9 puntos):
 #define CONFIG_PROBING_GRID_POINTS      3
 
-// Prueba de repetibilidad y precisión M48:
-// Habilita el comando M48 para diagnosticar la repetibilidad y salud del CR Touch:
+// Pruebas y Diagnóstico del Sensor CR Touch:
+// Habilita el comando M48 (test de repetibilidad de 10 puntos en cama) y
+// el comando M43 S (prueba manual interactiva: despliega la aguja, espera la
+// presión de tu mano en la punta, emite un pitido y muestra confirmación en pantalla):
 #define CONFIG_ENABLE_PROBE_TEST        true
 
 

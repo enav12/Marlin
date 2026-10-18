@@ -21,6 +21,7 @@
 | **10** | Generación de firmware para la pantalla DW7.4.6 | Descarga y extracción completa del paquete de 70 archivos binarios de la pantalla (`T5OS_V20_NOACK.BIN`, `T5UID1_V22.BIN`, `T5UID1.CFG`, fuentes `.HZK` e iconos `.ICL`) en `build/display_DW7.4.6/DWIN_SET/`. | ✅ **Implementado** |
 | **11** | Archivo centralizado de configuración fácil de modificar | Creación de [`PRINTER_CONFIG.h`](file:///c:/Enavarrete/Proyectos/Marlin/PRINTER_CONFIG.h) en la raíz del proyecto para modificar parámetros (dimensiones, pasos, sonda, drivers, pantalla, temperaturas) y scripts de 1 clic ([`build.ps1`](file:///c:/Enavarrete/Proyectos/Marlin/build.ps1) y [`build.bat`](file:///c:/Enavarrete/Proyectos/Marlin/build.bat)). | ✅ **Implementado** |
 | **12** | Opciones y herramientas de prueba para el sensor CR Touch | Habilitación del comando de diagnóstico de repetibilidad `M48` (`Z_MIN_PROBE_REPEATABILITY_TEST`), switch `CONFIG_ENABLE_PROBE_TEST` en `PRINTER_CONFIG.h` y creación del archivo ejecutable de prueba automática [`build/test_cr_touch.gcode`](file:///c:/Enavarrete/Proyectos/Marlin/build/test_cr_touch.gcode). | ✅ **Implementado** |
+| **13** | Prueba manual interactiva del CR Touch desde la pantalla táctil | Habilitación de `PINS_DEBUGGING` / `M43 S` con feedback visual en pantalla LCD (`ui.set_status`) y sonoro (`BUZZ`), y creación de [`build/01_test_cr_touch_manual.gcode`](file:///c:/Enavarrete/Proyectos/Marlin/build/01_test_cr_touch_manual.gcode) ejecutable con 1 toque desde el menú "Imprimir" / "Print" de la pantalla táctil para esperar y validar la presión manual en la aguja. | ✅ **Implementado** |
 
 ---
 
@@ -94,12 +95,15 @@ gantt
 
 ### Fase 5: Validación, Compilación y Flasheo [100%]
 - [x] Compilación exitosa del firmware con PlatformIO:
-  - Uso de memoria RAM: 5,880 bytes (9.0% de 64 KB).
-  - Uso de memoria Flash: 106,796 bytes (21.5% de 484 KB).
+  - Uso de memoria RAM: 5,996 bytes (9.1% de 64 KB).
+  - Uso de memoria Flash: 113,592 bytes (22.9% de 484 KB).
 - [x] Archivo binario de la placa generado y copiado a [`build/creality_v427/`](file:///c:/Enavarrete/Proyectos/Marlin/build/creality_v427):
-  - `build/creality_v427/firmware-20261017-212413.bin` (104,452 bytes).
-  - `build/creality_v427/firmware.bin` (104,452 bytes).
+  - `build/creality_v427/firmware-20261017-222834.bin` (113,592 bytes).
+  - `build/creality_v427/firmware.bin` (113,592 bytes).
 - [x] Firmware de la pantalla descargado, descomprimido y listo en [`build/display_DW7.4.6/DWIN_SET/`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_DW7.4.6/DWIN_SET/).
+- [x] Scripts de prueba interactiva y automática en `build/`:
+  - [`build/01_test_cr_touch_manual.gcode`](file:///c:/Enavarrete/Proyectos/Marlin/build/01_test_cr_touch_manual.gcode): Prueba manual interactiva de presión con la mano desde la pantalla táctil.
+  - [`build/test_cr_touch.gcode`](file:///c:/Enavarrete/Proyectos/Marlin/build/test_cr_touch.gcode): Diagnóstico automático completo (M48 + G28 + G29).
 - [x] Scripts de compilación rápida creados: [`build.ps1`](file:///c:/Enavarrete/Proyectos/Marlin/build.ps1) y [`build.bat`](file:///c:/Enavarrete/Proyectos/Marlin/build.bat).
 
 ### Fase 6: Mantenimiento y Actualizaciones Futuras (Upstream) [100%]
@@ -111,9 +115,24 @@ gantt
 
 ## 4. Opciones para Probar el Sensor CR Touch
 
-Dispones de tres métodos para verificar que el sensor funcione perfectamente:
+Dispones de cuatro métodos para verificar que el sensor funcione perfectamente:
 
-### Opción 1: Archivo de Diagnóstico Automático (Sin PC)
+### Opción 1: Prueba Manual Interactiva desde la Pantalla Táctil (Detección por Mano con `M43 S`)
+1. Copia el archivo [`build/01_test_cr_touch_manual.gcode`](file:///c:/Enavarrete/Proyectos/Marlin/build/01_test_cr_touch_manual.gcode) a la raíz de tu tarjeta MicroSD.
+2. En la pantalla táctil de tu impresora, entra en **Print / Imprimir** (aparecerá en la parte superior gracias al prefijo `01_`).
+3. Toca `01_test_cr_touch_manual.gcode` y presiona **Confirmar / OK**.
+4. La rutina interactiva se pondrá en marcha:
+   - Centra el cabezal en X e Y y eleva el eje Z 60 mm para que puedas meter la mano cómodamente.
+   - Muestra en pantalla el mensaje: `CR Touch: Toque punta!` y emite un pitido.
+   - Despliega la aguja metálica del sensor hacia abajo y entra en modo de espera (hasta 30 segundos).
+   - **Acción tuya**: Con tu dedo o mano, presiona suavemente la punta metálica hacia arriba (emulando el contacto con la cama).
+   - **Respuesta inmediata**: Al detectar el cambio de estado óptico en el pin `PB1`:
+     - El sensor sube la aguja inmediatamente.
+     - La pantalla táctil muestra: `CR Touch: OK DETECTADO!`.
+     - La impresora emite un pitido agudo de confirmación (`BUZZ 1500 Hz`).
+   - *(Si pasan 30 segundos sin tocar la aguja, emitirá un tono grave de aviso y mostrará `CR Touch: NO DETECTADO!`)*.
+
+### Opción 2: Archivo de Diagnóstico Automático (Sin PC)
 1. Copia el archivo [`build/test_cr_touch.gcode`](file:///c:/Enavarrete/Proyectos/Marlin/build/test_cr_touch.gcode) a tu tarjeta MicroSD.
 2. Inserta la MicroSD en la impresora y selecciona **Print / Imprimir** -> `test_cr_touch.gcode`.
 3. La impresora ejecutará automáticamente:
@@ -124,7 +143,7 @@ Dispones de tres métodos para verificar que el sensor funcione perfectamente:
    - Mapeo completo de la malla de nivelación de 9 puntos (`G29`).
    - Elevación del cabezal y pitido de confirmación.
 
-### Opción 2: Prueba de Precisión y Repetibilidad por Comando `M48`
+### Opción 3: Prueba de Precisión y Repetibilidad por Comando `M48`
 Desde cualquier terminal serie (Pronterface, OctoPrint o consola G-code a 115200 baudios):
 ```gcode
 G28                     ; Hace home en todos los ejes
@@ -134,7 +153,7 @@ M48 P10 X110 Y110 V2    ; Ejecuta 10 mediciones consecutivas en el centro
 - Marlin devolverá un reporte con la desviación estándar (`Standard Deviation: 0.00XXXX mm`).
 - Si la desviación es menor a **0.005 mm**, el sensor tiene una precisión excelente.
 
-### Opción 3: Comandos de Diagnóstico Rápido de Solenoide
+### Opción 4: Comandos de Diagnóstico Rápido de Solenoide
 | Comando G-code | Acción que realiza el CR Touch |
 | :--- | :--- |
 | `M280 P0 S10` | **Baja la aguja** (Deploy probe) |

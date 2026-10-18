@@ -4251,8 +4251,9 @@
 
 //
 // M43 - display pin status, toggle pins, watch pins, watch endstops & toggle LED, test servo probe
-//
-//#define PINS_DEBUGGING
+#if CONFIG_ENABLE_PROBE_TEST
+  #define PINS_DEBUGGING
+#endif
 
 // Enable Tests that will run at startup and produce a report
 //#define MARLIN_TEST_BUILD

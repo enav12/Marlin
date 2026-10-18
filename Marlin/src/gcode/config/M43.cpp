@@ -46,8 +46,12 @@
   #include "../../lcd/extui/ui_api.h"
 #endif
 
-#if HAS_RESUME_CONTINUE
+#if ANY(HAS_RESUME_CONTINUE, HAS_STATUS_MESSAGE)
   #include "../../lcd/marlinui.h"
+#endif
+
+#if HAS_BUZZER
+  #include "../../libs/buzzer.h"
 #endif
 
 #ifndef GET_PIN_MAP_PIN_M43
@@ -232,6 +236,7 @@ inline void servo_probe_test() {
     servo[probe_index].move(servo_angles[Z_PROBE_SERVO_NR][0]); // Deploy
     safe_delay(500);
     SERIAL_ECHOLNPGM("** Please trigger probe within 30 sec **");
+    TERN_(HAS_STATUS_MESSAGE, ui.set_status(F("CR Touch: Toque punta!"), true));
     uint16_t probe_counter = 0;
 
     // Wait 30 seconds for user to trigger probe
@@ -256,15 +261,31 @@ inline void servo_probe_test() {
           }
           else SERIAL_ECHOPGM("= BLTouch pre V3.1 (or compatible)");
           SERIAL_ECHOLNPGM(" detected.");
+          TERN_(HAS_STATUS_MESSAGE, ui.set_status(F("CR Touch: OK DETECTADO!"), true));
+          #if HAS_BUZZER
+            BUZZ(300, 1500);
+          #endif
         }
-        else SERIAL_ECHOLNPGM("FAIL: Noise detected - please re-run test");
+        else {
+          SERIAL_ECHOLNPGM("FAIL: Noise detected - please re-run test");
+          TERN_(HAS_STATUS_MESSAGE, ui.set_status(F("CR Touch: RUIDO / FALLO"), true));
+          #if HAS_BUZZER
+            BUZZ(200, 400);
+          #endif
+        }
 
         servo[probe_index].move(servo_angles[Z_PROBE_SERVO_NR][1]); // Stow
         return;
       }
     }
 
-    if (!probe_counter) SERIAL_ECHOLNPGM("FAIL: No trigger detected");
+    if (!probe_counter) {
+      SERIAL_ECHOLNPGM("FAIL: No trigger detected");
+      TERN_(HAS_STATUS_MESSAGE, ui.set_status(F("CR Touch: NO DETECTADO!"), true));
+      #if HAS_BUZZER
+        BUZZ(500, 300);
+      #endif
+    }
 
   #endif // HAS_Z_SERVO_PROBE
 
