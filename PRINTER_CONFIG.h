@@ -82,6 +82,10 @@
 // Cantidad de puntos de palpado por eje para la malla de nivelación (3 = matriz 3x3 de 9 puntos):
 #define CONFIG_PROBING_GRID_POINTS      3
 
+// Prueba de repetibilidad y precisión M48:
+// Habilita el comando M48 para diagnosticar la repetibilidad y salud del CR Touch:
+#define CONFIG_ENABLE_PROBE_TEST        true
+
 
 // =============================================================================
 // 7. PANTALLA TÁCTIL DW7.4.6 (DWIN DGUS)

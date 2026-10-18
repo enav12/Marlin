@@ -20,6 +20,7 @@
 | **9** | Generación de archivo `.bin` listo para instalar | Compilación exitosa con PlatformIO para el entorno `STM32F103RE_creality`, corrección de `FAN_SOFT_PWM` y despliegue del binario en `build/creality_v427/`. | ✅ **Implementado** |
 | **10** | Generación de firmware para la pantalla DW7.4.6 | Descarga y extracción completa del paquete de 70 archivos binarios de la pantalla (`T5OS_V20_NOACK.BIN`, `T5UID1_V22.BIN`, `T5UID1.CFG`, fuentes `.HZK` e iconos `.ICL`) en `build/display_DW7.4.6/DWIN_SET/`. | ✅ **Implementado** |
 | **11** | Archivo centralizado de configuración fácil de modificar | Creación de [`PRINTER_CONFIG.h`](file:///c:/Enavarrete/Proyectos/Marlin/PRINTER_CONFIG.h) en la raíz del proyecto para modificar parámetros (dimensiones, pasos, sonda, drivers, pantalla, temperaturas) y scripts de 1 clic ([`build.ps1`](file:///c:/Enavarrete/Proyectos/Marlin/build.ps1) y [`build.bat`](file:///c:/Enavarrete/Proyectos/Marlin/build.bat)). | ✅ **Implementado** |
+| **12** | Opciones y herramientas de prueba para el sensor CR Touch | Habilitación del comando de diagnóstico de repetibilidad `M48` (`Z_MIN_PROBE_REPEATABILITY_TEST`), switch `CONFIG_ENABLE_PROBE_TEST` en `PRINTER_CONFIG.h` y creación del archivo ejecutable de prueba automática [`build/test_cr_touch.gcode`](file:///c:/Enavarrete/Proyectos/Marlin/build/test_cr_touch.gcode). | ✅ **Implementado** |
 
 ---
 
@@ -47,6 +48,7 @@ gantt
     section Fase 6: Mantenimiento y Upgrades
     Estrategia de actualización upstream           :done, 30, 50
     Archivo central de configuración (PRINTER_CONFIG):done, 50, 65
+    Herramientas de diagnóstico y prueba CR Touch  :done, 65, 80
 ```
 
 ---
@@ -75,6 +77,7 @@ gantt
 - [x] Archivo fuente de respaldo [`build/display_DW7.4.6/CombinedLandscapeDwin_TM3D_V8.7z`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_DW7.4.6/CombinedLandscapeDwin_TM3D_V8.7z).
 - [x] Diagrama de conexionado EXP1 (UART3 PB10/PB11) en [`build/display_DW7.4.6/hardware/pinout_creality_v427_dwin.md`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_DW7.4.6/hardware/pinout_creality_v427_dwin.md).
 - [x] Carpeta receptora de binario compilado en [`build/creality_v427/`](file:///c:/Enavarrete/Proyectos/Marlin/build/creality_v427).
+- [x] Archivo de prueba automática [`build/test_cr_touch.gcode`](file:///c:/Enavarrete/Proyectos/Marlin/build/test_cr_touch.gcode).
 
 ### Fase 4: Integración Pantalla DW7.4.6 + Sensor CR Touch [100%]
 - [x] **Pantalla DWIN DW7.4.6**:
@@ -87,13 +90,14 @@ gantt
   - [x] Auto Bed Leveling bilineal 3x3 (`AUTO_BED_LEVELING_BILINEAR`) con `RESTORE_LEVELING_AFTER_G28`.
   - [x] `Z_SAFE_HOMING` en el centro de la cama (110, 110 mm).
   - [x] Babystepping y guardado en EEPROM (`M500`).
+  - [x] Habilitada la prueba de repetibilidad `M48` (`Z_MIN_PROBE_REPEATABILITY_TEST`).
 
 ### Fase 5: Validación, Compilación y Flasheo [100%]
 - [x] Compilación exitosa del firmware con PlatformIO:
   - Uso de memoria RAM: 5,880 bytes (9.0% de 64 KB).
-  - Uso de memoria Flash: 103,900 bytes (21.0% de 484 KB).
+  - Uso de memoria Flash: 106,796 bytes (21.5% de 484 KB).
 - [x] Archivo binario de la placa generado y copiado a [`build/creality_v427/`](file:///c:/Enavarrete/Proyectos/Marlin/build/creality_v427):
-  - `build/creality_v427/firmware-20261017-211600.bin` (104,452 bytes).
+  - `build/creality_v427/firmware-20261017-212413.bin` (104,452 bytes).
   - `build/creality_v427/firmware.bin` (104,452 bytes).
 - [x] Firmware de la pantalla descargado, descomprimido y listo en [`build/display_DW7.4.6/DWIN_SET/`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_DW7.4.6/DWIN_SET/).
 - [x] Scripts de compilación rápida creados: [`build.ps1`](file:///c:/Enavarrete/Proyectos/Marlin/build.ps1) y [`build.bat`](file:///c:/Enavarrete/Proyectos/Marlin/build.bat).
@@ -105,22 +109,35 @@ gantt
 
 ---
 
-## 4. Cómo Modificar Parámetros y Recompilar (Flujo Rápido)
+## 4. Opciones para Probar el Sensor CR Touch
 
-A partir de ahora, **no necesitas abrir ni buscar en Configuration.h ni en Configuration_adv.h**.
+Dispones de tres métodos para verificar que el sensor funcione perfectamente:
 
-### Paso 1: Edita [`PRINTER_CONFIG.h`](file:///c:/Enavarrete/Proyectos/Marlin/PRINTER_CONFIG.h)
-Abre el archivo [PRINTER_CONFIG.h](file:///c:/Enavarrete/Proyectos/Marlin/PRINTER_CONFIG.h) en el editor. Allí puedes cambiar con facilidad:
-- **Pasos por mm del extrusor**: `#define CONFIG_STEPS_E 93.0` (o `138.0` si cambias a un extrusor dual drive).
-- **Dimensiones de la cama**: `#define CONFIG_BED_X 220`, `#define CONFIG_BED_Y 220`, `#define CONFIG_BED_Z 250`.
-- **Sensor CR Touch**: `#define CONFIG_ENABLE_CR_TOUCH true` (o `false` para volver al switch mecánico).
-- **Offsets de la sonda**: `#define CONFIG_PROBE_OFFSET_X -44`, `CONFIG_PROBE_OFFSET_Y -10`.
-- **Temperaturas máximas**: `#define CONFIG_HOTEND_MAXTEMP 275`.
-- **Nombre de la impresora**: `#define CONFIG_MACHINE_NAME "Mi Ender-3"`.
+### Opción 1: Archivo de Diagnóstico Automático (Sin PC)
+1. Copia el archivo [`build/test_cr_touch.gcode`](file:///c:/Enavarrete/Proyectos/Marlin/build/test_cr_touch.gcode) a tu tarjeta MicroSD.
+2. Inserta la MicroSD en la impresora y selecciona **Print / Imprimir** -> `test_cr_touch.gcode`.
+3. La impresora ejecutará automáticamente:
+   - Despliegue y retracción de la aguja metálica.
+   - Auto-prueba (Self-Test) de 10 oscilaciones.
+   - Auto Home (`G28`) seguro en el centro de la cama.
+   - Prueba de precisión y repetibilidad de 10 mediciones (`M48`).
+   - Mapeo completo de la malla de nivelación de 9 puntos (`G29`).
+   - Elevación del cabezal y pitido de confirmación.
 
-### Paso 2: Compilar en 1 Clic
-Puedes compilar usando cualquiera de estos métodos:
-1. **Con el script automático**: Ejecuta `./build.ps1` en PowerShell o haz doble clic en `build.bat`.
-2. **Con VS Code**: Pulsa el icono de compilar de PlatformIO o Auto Build Marlin.
+### Opción 2: Prueba de Precisión y Repetibilidad por Comando `M48`
+Desde cualquier terminal serie (Pronterface, OctoPrint o consola G-code a 115200 baudios):
+```gcode
+G28                     ; Hace home en todos los ejes
+M48 P10 X110 Y110 V2    ; Ejecuta 10 mediciones consecutivas en el centro
+```
+**Interpretación del resultado**:
+- Marlin devolverá un reporte con la desviación estándar (`Standard Deviation: 0.00XXXX mm`).
+- Si la desviación es menor a **0.005 mm**, el sensor tiene una precisión excelente.
 
-El script compilará automáticamente tomando tus nuevos parámetros de [PRINTER_CONFIG.h](file:///c:/Enavarrete/Proyectos/Marlin/PRINTER_CONFIG.h) y colocará el nuevo archivo `.bin` directamente en [build/creality_v427/](file:///c:/Enavarrete/Proyectos/Marlin/build/creality_v427).
+### Opción 3: Comandos de Diagnóstico Rápido de Solenoide
+| Comando G-code | Acción que realiza el CR Touch |
+| :--- | :--- |
+| `M280 P0 S10` | **Baja la aguja** (Deploy probe) |
+| `M280 P0 S90` | **Sube la aguja** (Stow probe) |
+| `M280 P0 S120` | **Self-Test** (Auto-prueba: la aguja oscila continuamente) |
+| `M280 P0 S160` | **Reset de Alarma** (Si el sensor titila en rojo por algún atasco físico) |
