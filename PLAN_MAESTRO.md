@@ -3,6 +3,9 @@
 > [!NOTE]
 > Este documento es el **Plan Maestro Incremental**. Cada nueva solicitud o requerimiento se integra a este plan, actualizando el estado de cada tarea y registrando el avance continuo del proyecto.
 
+> [!IMPORTANT]
+> **Regla Operativa del Proyecto**: Si el usuario formula una consulta con signo de interrogación (`?` o `¿`), **NO se debe generar ni modificar el plan**, solo contestar directamente por pantalla. Solo las solicitudes de implementación, configuración o cambios técnicos incrementan este plan.
+
 ---
 
 ## 1. Registro Histórico de Solicitudes
@@ -22,6 +25,7 @@
 | **11** | Archivo centralizado de configuración fácil de modificar | Creación de [`PRINTER_CONFIG.h`](file:///c:/Enavarrete/Proyectos/Marlin/PRINTER_CONFIG.h) en la raíz del proyecto para modificar parámetros (dimensiones, pasos, sonda, drivers, pantalla, temperaturas) y scripts de 1 clic ([`build.ps1`](file:///c:/Enavarrete/Proyectos/Marlin/build.ps1) y [`build.bat`](file:///c:/Enavarrete/Proyectos/Marlin/build.bat)). | ✅ **Implementado** |
 | **12** | Opciones y herramientas de prueba para el sensor CR Touch | Habilitación del comando de diagnóstico de repetibilidad `M48` (`Z_MIN_PROBE_REPEATABILITY_TEST`), switch `CONFIG_ENABLE_PROBE_TEST` en `PRINTER_CONFIG.h` y creación del archivo ejecutable de prueba automática [`build/test_cr_touch.gcode`](file:///c:/Enavarrete/Proyectos/Marlin/build/test_cr_touch.gcode). | ✅ **Implementado** |
 | **13** | Prueba manual interactiva del CR Touch desde la pantalla táctil | Habilitación de `PINS_DEBUGGING` / `M43 S` con feedback visual en pantalla LCD (`ui.set_status`) y sonoro (`BUZZ`), y creación de [`build/01_test_cr_touch_manual.gcode`](file:///c:/Enavarrete/Proyectos/Marlin/build/01_test_cr_touch_manual.gcode) ejecutable con 1 toque desde el menú "Imprimir" / "Print" de la pantalla táctil para esperar y validar la presión manual en la aguja. | ✅ **Implementado** |
+| **14** | Regla operativa: Consultas con interrogación no generan plan | Adición de regla permanente: Si el usuario realiza una consulta con signo de interrogación (`?` / `¿`), solo se responde por pantalla/chat sin generar ni modificar el Plan Maestro. | ✅ **Implementado** |
 
 ---
 
