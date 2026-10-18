@@ -580,7 +580,13 @@
  *   998 : Dummy Table that ALWAYS reads 25°C or the temperature defined below.
  *   999 : Dummy Table that ALWAYS reads 100°C or the temperature defined below.
  */
-#define TEMP_SENSOR_0 1
+#if CONFIG_EMULATE_THERMISTORS
+  #define TEMP_SENSOR_0   998
+  #define TEMP_SENSOR_BED 998
+#else
+  #define TEMP_SENSOR_0   1
+  #define TEMP_SENSOR_BED 1
+#endif
 #define TEMP_SENSOR_1 0
 #define TEMP_SENSOR_2 0
 #define TEMP_SENSOR_3 0
@@ -588,7 +594,6 @@
 #define TEMP_SENSOR_5 0
 #define TEMP_SENSOR_6 0
 #define TEMP_SENSOR_7 0
-#define TEMP_SENSOR_BED 1
 #define TEMP_SENSOR_PROBE 0
 #define TEMP_SENSOR_CHAMBER 0
 #define TEMP_SENSOR_COOLER 0
@@ -649,7 +654,13 @@
 
 // Below this temperature the heater will be switched off
 // because it probably indicates a broken thermistor wire.
-#define HEATER_0_MINTEMP   5
+#ifdef CONFIG_MINTEMP
+  #define HEATER_0_MINTEMP CONFIG_MINTEMP
+  #define BED_MINTEMP      CONFIG_MINTEMP
+#else
+  #define HEATER_0_MINTEMP   5
+  #define BED_MINTEMP        5
+#endif
 #define HEATER_1_MINTEMP   5
 #define HEATER_2_MINTEMP   5
 #define HEATER_3_MINTEMP   5
@@ -657,8 +668,10 @@
 #define HEATER_5_MINTEMP   5
 #define HEATER_6_MINTEMP   5
 #define HEATER_7_MINTEMP   5
-#define BED_MINTEMP        5
 #define CHAMBER_MINTEMP    5
+
+// Grace period on startup (2000ms) to allow ADC capacitors to stabilize:
+#define BOGUS_TEMPERATURE_GRACE_PERIOD 2000
 
 // Above this temperature the heater will be switched off.
 // This can protect components from overheating, but NOT from shorts and failures.

@@ -26,6 +26,7 @@
 | **12** | Opciones y herramientas de prueba para el sensor CR Touch | Habilitación del comando de diagnóstico de repetibilidad `M48` (`Z_MIN_PROBE_REPEATABILITY_TEST`), switch `CONFIG_ENABLE_PROBE_TEST` en `PRINTER_CONFIG.h` y creación del archivo ejecutable de prueba automática [`build/test_cr_touch.gcode`](file:///c:/Enavarrete/Proyectos/Marlin/build/test_cr_touch.gcode). | ✅ **Implementado** |
 | **13** | Prueba manual interactiva del CR Touch desde la pantalla táctil | Habilitación de `PINS_DEBUGGING` / `M43 S` con feedback visual en pantalla LCD (`ui.set_status`) y sonoro (`BUZZ`), y creación de [`build/01_test_cr_touch_manual.gcode`](file:///c:/Enavarrete/Proyectos/Marlin/build/01_test_cr_touch_manual.gcode) ejecutable con 1 toque desde el menú "Imprimir" / "Print" de la pantalla táctil para esperar y validar la presión manual en la aguja. | ✅ **Implementado** |
 | **14** | Regla operativa: Consultas con interrogación no generan plan | Adición de regla permanente: Si el usuario realiza una consulta con signo de interrogación (`?` / `¿`), solo se responde por pantalla/chat sin generar ni modificar el Plan Maestro. | ✅ **Implementado** |
+| **15** | Corrección de orientación vertical (Portrait) y error de arranque en pantalla CXSW043 | Diagnóstico de orientación (90° de giro por paquete horizontal vs soporte vertical en Ender-3) y error `STOPPED. Please Reset` (disparo por `MINTEMP` al no detectar termistores o bajas temperaturas). Provisión del paquete [`build/display_CXSW043_portrait/DWIN_SET/`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_CXSW043_portrait/DWIN_SET/) con resolución nativa 272x480 (`T5LCFG_272480.CFG`), configuración de `CONFIG_EMULATE_THERMISTORS` y `CONFIG_MINTEMP 0` en [`PRINTER_CONFIG.h`](file:///c:/Enavarrete/Proyectos/Marlin/PRINTER_CONFIG.h), y re-compilación de `firmware.bin`. | ✅ **Implementado** |
 
 ---
 
@@ -114,6 +115,20 @@ gantt
 - [x] **Archivo central de configuración**: [`PRINTER_CONFIG.h`](file:///c:/Enavarrete/Proyectos/Marlin/PRINTER_CONFIG.h) reside en la raíz y no se borra al actualizar Marlin.
 - [x] **Arquitectura desacoplada**: Todo lo instalable reside en `build/`.
 - [x] **Flujo Git configurado**: `origin` personal y `upstream` oficial.
+
+### Fase 7: Corrección de Pantalla CXSW043 (Orientación Vertical y MINTEMP) [100%]
+- [x] **Diagnóstico de Orientación ("de lado")**: La pantalla CXSW043 en la Ender-3 se monta verticalmente (Portrait 272x480). El paquete previo era horizontal (Landscape 480x272).
+- [x] **Paquete de pantalla Portrait 272x480 desplegado**:
+  - Ubicado en [`build/display_CXSW043_portrait/DWIN_SET/`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_CXSW043_portrait/DWIN_SET/).
+  - Contiene `T5LCFG_272480.CFG`, pantallas verticales e iconos nativos.
+  - Guía de flasheo paso a paso en [`build/display_CXSW043_portrait/README_PANTALLA_PORTRAIT.md`](file:///c:/Enavarrete/Proyectos/Marlin/build/display_CXSW043_portrait/README_PANTALLA_PORTRAIT.md).
+- [x] **Diagnóstico de Error de Arranque ("STOPPED. Please Reset" / "Fault Message")**:
+  - Ocurre porque Marlin detecta `MINTEMP` (< 5°C) en arranque si la placa se prueba sin los termistores del hotend o cama conectados a `TH1` y `TB1`.
+  - Se configuró `CONFIG_MINTEMP 0` en [`PRINTER_CONFIG.h`](file:///c:/Enavarrete/Proyectos/Marlin/PRINTER_CONFIG.h) para evitar falsos disparos en ambientes fríos.
+  - Se agregó `CONFIG_EMULATE_THERMISTORS` (sensor 998 / 25°C constante) para pruebas en banco sin cableado.
+  - Se habilitó `BOGUS_TEMPERATURE_GRACE_PERIOD 2000` para estabilización de capacitores ADC en encendido.
+- [x] **Compilación y Binario actualizado**:
+  - `build/creality_v427/firmware.bin` re-compilado exitosamente.
 
 ---
 

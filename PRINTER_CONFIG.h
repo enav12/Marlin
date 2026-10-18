@@ -101,8 +101,19 @@
 
 
 // =============================================================================
-// 8. TEMPERATURAS MÁXIMAS DE SEGURIDAD (°C)
+// 8. SENSORES DE TEMPERATURA Y LÍMITES DE SEGURIDAD (°C)
 // =============================================================================
+// true  (Modo Pruebas en Banco/Mesa): Emula temperaturas fijas de 25°C (sensor 998).
+//       Permite encender la placa, navegar en pantalla y probar el CR Touch en una
+//       mesa sin conectar los cables del hotend ni de la cama (evita error MINTEMP).
+// false (Modo Impresora Real): Usa los termistores NTC 100K reales de la máquina (TH1 y TB1).
+#define CONFIG_EMULATE_THERMISTORS      false
+
+// Temperatura mínima antes de disparar alarma de cable roto (MINTEMP).
+// En climas fríos o talleres sin calefacción se recomienda 0°C para evitar falsos cortes:
+#define CONFIG_MINTEMP                  0
+
+// Temperaturas máximas de seguridad:
 // La temperatura de trabajo máxima permitida es 15°C menor que el límite configurado:
 #define CONFIG_HOTEND_MAXTEMP           275     // Permite imprimir hasta 260°C (PLA, PETG, ABS, TPU)
 #define CONFIG_BED_MAXTEMP              125     // Permite calentar la cama hasta 110°C
