@@ -2145,6 +2145,9 @@
 #endif
 
 // Add a menu item to move between bed corners for manual bed adjustment
+#if CONFIG_ENABLE_DWIN_DW746
+  #define LCD_BED_TRAMMING
+#endif
 //#define LCD_BED_TRAMMING
 
 #if ENABLED(LCD_BED_TRAMMING)
@@ -2352,6 +2355,9 @@
  *    P1  Raise the nozzle always to Z-park height.
  *    P2  Raise the nozzle by Z-park amount, limited to Z_MAX_POS.
  */
+#if CONFIG_ENABLE_DWIN_DW746
+  #define NOZZLE_PARK_FEATURE
+#endif
 //#define NOZZLE_PARK_FEATURE
 
 #if ENABLED(NOZZLE_PARK_FEATURE)
@@ -3093,8 +3099,9 @@
  *  - Boot the display and wait for the update to complete.
  */
 #if CONFIG_ENABLE_DWIN_DW746
-  #define DGUS_LCD_UI_ORIGIN
+  #define DGUS_LCD_UI_IA_CREALITY
 #endif
+//#define DGUS_LCD_UI_ORIGIN
 //#define DGUS_LCD_UI_FYSETC
 //#define DGUS_LCD_UI_HIPRECY
 //#define DGUS_LCD_UI_MKS
